@@ -21,17 +21,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll()
-                        .anyRequest().authenticated() // Protects subsequent application resources
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Binds custom login form view mapping
-                        .defaultSuccessUrl("/items", true) // Redirects to your items portal on success
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout") // Automatically attaches the matching signed-out url parameter flag
+                        .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
 

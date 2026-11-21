@@ -28,29 +28,29 @@ public class RegistrationController {
                                @RequestParam String password,
                                Model model) {
 
-        if (username == null || username.length() < 3) {
-            model.addAttribute("error", "Username must be at least 3 characters long");
-            model.addAttribute("username", username); // Retains entered text
-            return "register"; // Returns template directly (no redirect)
+        String trimmedUsername = username == null ? "" : username.trim();
+
+        if (trimmedUsername.length() < 3) {
+            model.addAttribute("error", "Username must be at least 3 characters long.");
+            model.addAttribute("username", trimmedUsername);
+            return "register";
         }
 
         if (password == null || password.length() < 6) {
-            model.addAttribute("error", "Password must be at least 6 characters long");
-            model.addAttribute("username", username); // Retains entered text
-            return "register"; // Returns template directly (no redirect)
+            model.addAttribute("error", "Password must be at least 6 characters long.");
+            model.addAttribute("username", trimmedUsername);
+            return "register";
         }
 
-        if (appUserRepository.existsByUsername(username)) {
-            model.addAttribute("error", "Username already taken");
-            model.addAttribute("username", username); // Retains entered text
-            return "register"; // Returns template directly (no redirect)
+        if (appUserRepository.existsByUsername(trimmedUsername)) {
+            model.addAttribute("error", "Username already taken.");
+            model.addAttribute("username", trimmedUsername);
+            return "register";
         }
 
-        String encodedPassword = passwordEncoder.encode(password);
         AppUser newUser = new AppUser();
-        newUser.setUsername(username);
-        newUser.setPassword(encodedPassword);
-
+        newUser.setUsername(trimmedUsername);
+        newUser.setPassword(passwordEncoder.encode(password));
         appUserRepository.save(newUser);
 
         return "redirect:/login?registered";
