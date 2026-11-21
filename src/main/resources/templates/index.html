@@ -3,16 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <title>Campus Lost &amp; Found</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 24px; }
     h1   { color: green; }
+    .user-bar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
   </style>
 </head>
 <body>
-<form th:action="@{/logout}" method="post" style="float: right;">
-  <button type="submit">Sign out</button>
-</form>
+<div class="user-bar">
+  <span>Signed in as <strong th:text="${username}">user</strong></span>
+  <form th:action="@{/logout}" method="post" style="margin: 0;">
+    <button type="submit">Sign out</button>
+  </form>
+</div>
 
 <h1>Campus Lost &amp; Found</h1>
 
@@ -21,8 +27,8 @@
 
 <h2>Found something?</h2>
 <form id="reportForm">
-  <p><input id="title" placeholder="What is it?"></p>
-  <p><input id="location" placeholder="Where did you find it?"></p>
+  <p><input id="title" placeholder="What is it?" required></p>
+  <p><input id="location" placeholder="Where did you find it?" required></p>
   <button type="submit">Report item</button>
 </form>
 
@@ -40,15 +46,24 @@
 
   document.getElementById("reportForm").addEventListener("submit", async event => {
     event.preventDefault();
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
     const item = {
       title: document.getElementById("title").value,
       location: document.getElementById("location").value
     };
+
     await fetch("/api/items", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        [csrfHeader]: csrfToken
+      },
       body: JSON.stringify(item)
     });
+
     event.target.reset();
     loadItems();
   });
